@@ -1,0 +1,39 @@
+version: "3.3"
+
+services:
+  app:
+    build: ./
+    ports:
+      - 8080:8080
+    environment:
+      - REDIS_HOST=db_redis:6379
+      - REDIS_PASSWORD=qer342f9d#$@efsda
+      - URL_MYSQL="erew33:sadljoi438ud9s8a3234@tcp(db_sql:3306)/db?charset=utf8mb4&parseTime=True&loc=Local"
+    networks:
+      - snapfood
+
+  db_redis:
+    image: redis:latest
+    ports:
+      - 6379
+    command: /bin/sh -c "redis-server --requirepass $REDIS_PASSWORD"
+    environment:
+      - REDIS_PASSWORD=qer342f9d#$@efsda
+    networks:
+      - snapfood
+
+  db_sql:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_DATABASE: "db"
+      MYSQL_USER: "erew33"
+      MYSQL_PASSWORD: "sadljoi438ud9s8a3234"
+      MYSQL_ROOT_PASSWORD: "esdfrg43533gfds4"
+    ports:
+      - 3306
+    networks:
+      - snapfood
+
+networks:
+  snapfood: null
