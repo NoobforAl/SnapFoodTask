@@ -1,0 +1,7 @@
+.env
+FoodAdder/testdv.db
+FoodAdder/tmp
+Api/testdv.db
+Api/tmp
+.gitignore
+Dockerfile
