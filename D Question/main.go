@@ -2,41 +2,42 @@ package main
 
 import (
 	"fmt"
+	"sync"
+	"sync/atomic"
 )
 
-func worker(c chan int) {
-	for {
-		select {
-		case date, ok := <-c:
-			if ok {
-				if date == -1 {
-					return
-				}
-				c <- date * date
-			}
-		default:
-			continue
-		}
+func worker(c <-chan int64, s *int64, wg *sync.WaitGroup) {
+	var sum int64 = 0
+	defer wg.Done()
+
+	for v := range c {
+		sum += v * v
 	}
+
+	atomic.AddInt64(s, sum)
 }
 
-func sumPower2(nums []int) int {
-	ch := make(chan int)
-	var sum int = 0
+func sumPower2(nums []int64) int64 {
+	ch := make(chan int64)
+	var sum int64 = 0
+	var wg sync.WaitGroup
 
-	go worker(ch)
-	defer close(ch)
+	wg.Add(2)
+
+	go worker(ch, &sum, &wg)
+	go worker(ch, &sum, &wg)
 
 	for _, v := range nums {
 		ch <- v
-		sum += <-ch
 	}
 
-	ch <- -1
+	close(ch)
+
+	wg.Wait()
 	return sum
 }
 
 func main() {
-	nums := []int{12, 54, 89, 21, 66, 47, 14, 285, 96}
+	nums := []int64{12, 54, 89, 21, 66, 47, 14, 285, 96}
 	fmt.Println(sumPower2(nums))
 }
