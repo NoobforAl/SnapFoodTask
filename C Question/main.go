@@ -1,95 +1,95 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
-	"runtime"
 	"sync"
 	"time"
 )
 
-type reqUrl struct {
-	w   *sync.WaitGroup
-	m   *sync.Mutex
-	res []*http.Response
-	suc bool
+type Requester struct {
+	urls   *[]string
+	mu     *sync.Mutex
+	ctx    context.Context
+	cancel context.CancelFunc
+	res    []*http.Response
 }
 
-func (r *reqUrl) setFails() {
-	r.m.Lock()
-	r.suc = false
-	r.res = []*http.Response{}
-	r.m.Unlock()
-}
+func (re *Requester) request(url string) (*http.Response, error) {
+	ctx, cancel := context.WithCancel(re.ctx)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	defer cancel()
 
-func (r *reqUrl) isFails() bool {
-	r.m.Lock()
-	defer r.m.Unlock()
-	return r.suc
-}
-
-func (r *reqUrl) appendRes(res *http.Response) {
-	r.m.Lock()
-	r.res = append(r.res, res)
-	r.m.Unlock()
-}
-
-func (r *reqUrl) requestUrl(url string, cl http.Client) {
-	res, err := cl.Get(url)
-	defer r.w.Done()
 	if err != nil {
-		r.setFails()
-		return
+		return nil, err
 	}
-	if !r.isFails() {
-		return
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
 	}
-	r.appendRes(res)
+
+	return res, nil
 }
 
-func callUrls(urls []string) *reqUrl {
-	var wg sync.WaitGroup
+func (re *Requester) handelReq(url string) {
+	res, err := re.request(url)
+	if err != nil {
+		fmt.Println(err.Error())
+		re.cancel()
+		return
+	}
+
+	re.mu.Lock()
+	re.res = append(re.res, res)
+	if len(re.res) == len(*re.urls) {
+		defer re.cancel()
+	}
+	re.mu.Unlock()
+}
+
+func (re *Requester) Run() bool {
+	ctx, cancel := context.WithTimeout(context.TODO(), 10*time.Second)
+	defer cancel()
+
+	re.ctx = ctx
+	re.cancel = cancel
+
+	for _, v := range *re.urls {
+		go re.handelReq(v)
+	}
+
+	<-re.ctx.Done()
+	return len(re.res) == len(*re.urls)
+}
+
+func NewRequester(urls *[]string) *Requester {
 	var mu sync.Mutex
-	var i int8 = 0
-	// can't be one second Timeout
-	client := http.Client{Timeout: 3 * time.Second}
-
-	var req reqUrl = reqUrl{
-		w:   &wg,
-		m:   &mu,
-		suc: true,
+	return &Requester{
+		urls: urls,
+		mu:   &mu,
 	}
-
-	for _, v := range urls {
-		wg.Add(1)
-		go req.requestUrl(v, client)
-		if int8(runtime.NumCPU()/4) == i {
-			wg.Wait()
-			i = 0
-		}
-		i++
-	}
-	wg.Wait()
-
-	return &req
 }
 
 func main() {
-	res := callUrls([]string{
-		"https://gobyexample.com/",
-		"https://gobyexample.com/",
+	r := NewRequester(&[]string{
 		"https://stackoverflow.com/",
 		"https://stackoverflow.com/",
+		"https://gobyexample.com/",
+		"https://gobyexample.com/",
 	})
-	if res.suc {
-		for _, v := range res.res {
+
+	if !r.Run() {
+		fmt.Println("one Url can't get data!")
+	} else {
+		for _, v := range r.res {
 			time.Sleep(1 * time.Second)
 			fmt.Println("Status: ", v.Status)
 			fmt.Println("Status Code: ", v.StatusCode)
 			fmt.Println("Header", v.Header)
 			fmt.Println("Body: ", v.Body)
+			fmt.Println()
 		}
-	} else {
-		fmt.Println("One Url Get Error!")
 	}
 }
