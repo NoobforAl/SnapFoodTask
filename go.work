@@ -1,0 +1,8 @@
+go 1.19
+
+use (
+	"./A Question"
+	"./B Question"
+	"./C Question"
+	"./D Question"
+)
