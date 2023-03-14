@@ -1,8 +1,9 @@
 package main
 
 import (
-	"Api/core"
-	"log"
+	"A-Question/Api/router"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -14,9 +15,9 @@ func main() {
 		Format: "\n${time} | ${ip}:${port} | ${status} - ${method} ${path}",
 	})).Name("logger")
 
-	core.Router(app)
+	router.Router(app)
 
-	if err := app.Listen("127.0.0.1:8080"); err != nil {
+	if err := app.Listen("0.0.0.0:8080"); err != nil {
 		log.Fatal(err)
 	}
 }

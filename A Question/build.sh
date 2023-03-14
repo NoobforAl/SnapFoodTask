@@ -1,8 +1,28 @@
+#!/bin/sh
+
 echo "Build Apps"
-cd /tmp/Api && \
-   go build -o /app/api main.go
 
-cd /tmp/FoodAdder && \
-   go build -o /app/foodadder main.go
+if  ! go mod tidy ; then
 
-cp /tmp/run.sh /app
+   echo "can't get tools."
+   exit 1
+   
+fi
+
+if   ! go build -o /tmp/api ./Api/main.go ; then
+
+   echo "can't build api project."
+   exit 1
+   
+fi
+
+if ! go build -o /tmp/Nodefoodadder ./NodeFoodAdder/main.go ; then
+
+   echo "can't build Nodefoodadder project."
+   exit 1
+   
+fi
+
+echo "copy run.sh file to /app"
+
+cp /app/run.sh /tmp/run.sh

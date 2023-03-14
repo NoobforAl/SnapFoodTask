@@ -1,11 +1,19 @@
-FROM golang:1.19
-
-ENV HTTPS_PROXY="http://fodev.org:8118"
+FROM golang:1.20
 
 WORKDIR /app
 
-COPY . /tmp
-RUN bash /tmp/build.sh
-RUN rm -rf /tmp/*
+COPY . .
 
-CMD [ "sh", "/app/run.sh" ]
+RUN sed -i 's/\r$//'  ./build.sh  && \  
+    chmod +x  ./build.sh 
+
+RUN bash  ./build.sh
+
+RUN sed -i 's/\r$//'  /tmp/run.sh  && \  
+    chmod +x  /tmp/run.sh 
+
+RUN rm -rf ./*
+
+RUN mv /tmp/* ./
+
+CMD [ "bash", "/app/run.sh" ]
