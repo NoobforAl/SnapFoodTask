@@ -1,3 +1,13 @@
-sleep 30
+#!/bin/sh
+
+echo "sleep 30s for load database!"
+
+sleep 30 &&  
+
+echo "load Api!"
+
 /app/api &
-/app/foodadder
+
+echo "load Nodefoodadder!"
+
+/app/Nodefoodadder

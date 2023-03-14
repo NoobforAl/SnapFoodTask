@@ -8,7 +8,12 @@ services:
     environment:
       - REDIS_HOST=db_redis:6379
       - REDIS_PASSWORD=qer342f9d#$@efsda
-      - URL_MYSQL="erew33:sadljoi438ud9s8a3234@tcp(db_sql:3306)/db"
+      - URL_MYSQL=root:esdfrg43533gfds4@tcp(db_sql:3306)/db
+
+    depends_on:
+      - db_sql
+      - db_redis
+    restart: unless-stopped
     networks:
       - snapfood
 
@@ -26,10 +31,8 @@ services:
     image: mysql:latest
     restart: always
     environment:
-      MYSQL_DATABASE: "db"
-      MYSQL_USER: "erew33"
-      MYSQL_PASSWORD: "sadljoi438ud9s8a3234"
-      MYSQL_ROOT_PASSWORD: "esdfrg43533gfds4"
+      MYSQL_DATABASE: db
+      MYSQL_ROOT_PASSWORD: esdfrg43533gfds4
     ports:
       - 3306
     networks:
