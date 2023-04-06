@@ -1,32 +1,23 @@
 package main
 
-import "fmt"
+import (
+	"log"
+)
 
-func foundSingle(arr *[]int) int {
-	keys := make(map[int]int)
-
-	for i, v := range *arr {
-		if _, ok := keys[v]; ok {
-			delete(keys, v)
-		} else {
-			keys[v] = i
-		}
+func foundSingle(arr []int) int {
+	var exception int
+	for _, v := range arr {
+		exception ^= v
 	}
-
-	for v := range keys {
-		return v
-	}
-
-	return -1
+	return exception
 }
 
 func main() {
 	arr := []int{2, 2, 5, 6, 5}
-	ans := foundSingle(&arr)
+	ans := foundSingle(arr)
 
-	if ans != -1 {
-		fmt.Printf("Value : %d", ans)
-	} else {
-		fmt.Println("NotFound!")
+	if ans != 6 {
+		log.Fatalf("Wrong Answer!\nAnswer Equal 6 not equal: %d", ans)
 	}
+	log.Println("True Answer!")
 }
