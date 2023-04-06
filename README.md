@@ -32,18 +32,21 @@ we want a pipeline to send this numbers to a channel and have 2 concurrent funct
 
 ---
 
-# How Run Tasks
+## How Run Tasks
 
 1 - For task A read readme file in A Question
 
 2 - For Run task B/C/D"
-   - go to  " B/C/D Question " folder,
-   run main.go < ` go run main ` >, 
-   this is very simple test code, 
+
+- go to  " B/C/D Question " folder,  
+   run main.go < ` go run main ` >,  
+   this is very simple test code,  
    for more test run < ` go test ./... ` >.
 
+---
 
+### Wrong
 
-### Worng
 This Repo After Interview Changed !  
-My First Answer Was 2 month before last change!
+My First Answer Was 2 month before last change!  
+last Commit : 28cf1656368a9ce3621f9e2c10ac06c44b67eb51
